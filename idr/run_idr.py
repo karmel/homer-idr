@@ -29,6 +29,11 @@ class IdrArgumentParser(ArgumentParser):
                 help='Program to run; options are: idr, homer2narrow'),
         self.add_argument('-p','--peak_files', nargs='*', dest='peak_files',
                 help='Space-separated list of input Homer peak files.')
+        self.add_argument('-d','--tag_dirs', nargs='*', dest='tag_dirs',
+                help='Space-separated list of input Homer tag directories.')
+        self.add_argument('--pseudorep_count', nargs='?', dest='pseudorep_count',
+                type=int, default=2,
+                help='Number of pseudoreplicates to create. Default: 2')
         self.add_argument('-o','--output_dir', nargs='?', dest='output_dir',
                 help='Directory name in which output files will be placed. ' +
                 'Will be created if it does not exist.')
@@ -46,17 +51,14 @@ class IdrArgumentParser(ArgumentParser):
         
         Returns the set of filenames for generated narrowPeak files.
         '''
-        if not options.output_dir:
-            raise Exception('An output directory is needed to run homer2narrow.')
-        if not os.path.exists(options.output_dir):
-            os.makedirs(options.output_dir)
+        self.check_output_dir(options)
              
         idrutils = IdrUtilities()
         output_files = []
         for peak_file in options.peak_files:
             # Get extensionless name of file
             basename = os.path.splitext(os.path.basename(peak_file))[0]
-            output_file = os.path.join(options.output_dir, basename + '.narrow.bed')
+            output_file = os.path.join(options.output_dir, basename + '.narrowPeak')
             
             data = idrutils.import_homer_peaks(peak_file)
             idrutils.homer_to_narrow_peaks(data, output_file)
@@ -64,6 +66,39 @@ class IdrArgumentParser(ArgumentParser):
             print('NarrowPeak file output to {}'.format(output_file))
             output_files.append(output_file)
         return output_files
+    
+    def pseudoreplicate(self, options):
+        '''
+        Generate pseudoreplicates for passed tag directory by splitting randomly.
+        '''
+        self.check_output_dir(options)
+        
+        idrutils = IdrUtilities()
+        for tag_dir in options.tag_dirs:
+            print('Generating {} pseudoreplicate tag directories for {}'.format(
+                                options.pseudorep_count, tag_dir))
+            idrutils.create_pseudoreps(tag_dir, options.output_dir, 
+                                       count=options.pseudorep_count)
+        
+    def truncate(self, options, peak_files):
+        '''
+        Truncate SORTED narrowPeak files so that they are all the same length.
+        '''
+        self.check_output_dir(options)
+        
+        idrutils = IdrUtilities()
+        output_files = idrutils.standardize_peak_counts(peak_files, 
+                                                        options.output_dir)
+        
+        return output_files
+        
+        
+                              
+    def check_output_dir(self, options):
+        if not options.output_dir:
+            raise Exception('An output directory is needed to run homer2narrow.')
+        if not os.path.exists(options.output_dir):
+            os.makedirs(options.output_dir)
     
 if __name__ == '__main__':
     parser = IdrArgumentParser()
@@ -73,8 +108,14 @@ if __name__ == '__main__':
         narrows = parser.homer2narrow(options)
         for narrow_peak in narrows:
             pass
+    elif options.command == 'pseudoreplicate':
+        parser.pseudoreplicate(options)
     elif options.command == 'homer2narrow':
         parser.homer2narrow(options)
+    elif options.command == 'truncate':
+        parser.truncate(options, peak_files=options.peak_files)
+        
+    
     else:
         print('Command {} not recognized.'.format(options.command))
         parser.print_help()

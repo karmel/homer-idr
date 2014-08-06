@@ -4,10 +4,16 @@ Created on Aug 4, 2014
 @author: karmel
 
 '''
+import os
+import re
 import numpy as np
 from pandas.io.parsers import read_csv
 from collections import OrderedDict
 from pandas import DataFrame, Series
+from random import randint, random
+import math
+import subprocess
+
 
 class IdrUtilities(object):
     '''
@@ -15,6 +21,44 @@ class IdrUtilities(object):
     necessary to run the IDR R code.
     '''
     
+    ######################################################
+    # Creating pseudo-replicates
+    ######################################################
+    def create_pseudoreps(self, tag_dir, output_dir, count=2):
+        '''
+        Randomly split a Homer tag directory into two parts with approximately
+        equal number of reads.
+        
+        @todo: this is super slow. Use shuff at the command line!
+        '''
+        tag_dir_name = os.path.basename(tag_dir)
+        # Make destination directories
+        pseudo_tag_dirs = []
+        for i in range(1,count + 1):
+            pseudo_tag_dirs.append(os.path.join(output_dir, 
+                                    tag_dir_name + '-Pseudorep' + str(i)))
+            os.mkdir(pseudo_tag_dirs[i - 1])
+            
+        for f in os.listdir(tag_dir):
+            # If this is a chr[X].txt file
+            if re.match('chr[A-Za-z0-9]+\.tags\.tsv$',f):
+                chr_file = open(os.path.join(tag_dir, f), 'r')
+                
+                open_files = []
+                for dir in pseudo_tag_dirs: 
+                    open_files.append(open(os.path.join(dir, f), 'w+'))
+                
+                for line in chr_file:
+                    # Roll the die and send into appropriate pseudorep
+                    # We don't use randint here because it is very slow!
+                    selected_rep = math.floor(random()*count)
+                    open_files[selected_rep].write(line)
+                
+                for dir in open_files: dir.close() 
+                        
+    ######################################################
+    # Converting Homer Peaks to narrowPeak files
+    ######################################################
     def import_homer_peaks(self, filename):
         '''
         Takes filename, returns dataframe of Homer peaks after stripping
@@ -65,6 +109,7 @@ class IdrUtilities(object):
             ('peak', Series([-1]*data.shape[0])), # Leave -1 as no point-source is called for each peak
             ))
         df = DataFrame(columns)
+        df = df.sort(['signalValue','pValue'], ascending=False)
         df.to_csv(output_file, sep='\t', header=False, index=False)
         
     def get_first_column(self, data, names):
@@ -78,4 +123,34 @@ class IdrUtilities(object):
         raise Exception(
             'None of the columns "{}" were found.').format(', '.join(names))
         
+    ######################################################
+    # Standardizing peak counts for narrowPeak files
+    ######################################################
+    def standardize_peak_counts(self, peak_files, output_dir, max_count=None):
+        '''
+        Make sure all passed narrowPeak files have the same number of rows.
         
+        Assumes peak files are sorted in descending order!
+        '''
+        # Find the peak file with the fewest rows
+        min_rows = None
+        for peak_file in peak_files:
+            count = subprocess.check_output('wc -l {}'.format(peak_file), shell=True)
+            count = int(count.split()[0])
+            if min_rows is None or count < min_rows:
+                min_rows = int(count)
+        
+        if max_count and min_rows > max_count: min_rows = max_count 
+        
+        # Truncate all to the min count
+        output_files = []
+        for peak_file in peak_files:
+            basename, ext = os.path.splitext(os.path.basename(peak_file))
+            output_file = os.path.join(output_dir, basename + '-truncated.' + ext)
+            subprocess.check_call('head -n {} {} > {}'.format(
+                                        min_rows, peak_file, output_file), 
+                                  shell=True)
+            output_files.append(output_file)
+        
+        return output_files
+            
