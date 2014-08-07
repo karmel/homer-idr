@@ -65,20 +65,29 @@ class IdrUtilities(object):
                                 shell=True)
         
                 subprocess.check_call('rm {}'.format(shuffled_file), shell=True)
-                
-        # Finally, use Homer to re-make tag directory, as we want
-        # an accurate tagInfo file.
-        # Make sure to use the /usr/bin/env clause to tell Python to look
-        # in the environment's path for Homer.
-        cmd = '/usr/bin/env makeTagDirectory {} -d {}'.format(
-                            pseudo_tag_dirs[i - 1],
-                            pseudo_tag_dirs[i - 1] + '-tmp')
-        print(cmd)
-        subprocess.check_call(cmd.split())
-        subprocess.check_call('rm -rf {}'.format(
-                            pseudo_tag_dirs[i - 1] + '-tmp'), shell=True)
         
+        # Finally, use Homer to clean up
+        for i in range(0, count):
+            self.clean_up_pseudoreps(pseudo_tag_dirs[i], 
+                                     [pseudo_tag_dirs[i] + '-tmp'])
+    
         return pseudo_tag_dirs
+    
+    def clean_up_pseudoreps(self, target_dir, source_dirs): 
+        '''
+        Use Homer to re-make tag directory, as we want an accurate tagInfo file.
+        Make sure to use the /usr/bin/env clause to tell Python to look
+        in the environment's path for Homer.
+        '''
+        cmd = '/usr/bin/env makeTagDirectory {} -d {}'.format(
+                            target_dir,
+                            ' '.join(source_dirs))
+        
+        subprocess.check_call(cmd.split())
+        for source in source_dirs:
+            subprocess.check_call('rm -rf {}'.format(source), shell=True)
+        
+        return target_dir
                 
                         
     ######################################################

@@ -31,6 +31,8 @@ class IdrArgumentParser(ArgumentParser):
                 help='Space-separated list of input Homer peak files.')
         self.add_argument('-d','--tag_dirs', nargs='*', dest='tag_dirs',
                 help='Space-separated list of input Homer tag directories.')
+        self.add_argument('--pooled-dir-name', nargs='*', dest='pooled_dir_name',
+                help='Base name for pooled pseudorep directories.')
         self.add_argument('--pseudorep_count', nargs='?', dest='pseudorep_count',
                 type=int, default=2,
                 help='Number of pseudoreplicates to create. Default: 2')
@@ -70,15 +72,39 @@ class IdrArgumentParser(ArgumentParser):
     def pseudoreplicate(self, options):
         '''
         Generate pseudoreplicates for passed tag directory by splitting randomly.
+        
+        Returns sets of pseudoreps such that each numbered rep is grouped together:
+        [(Sample1-Pseudorep1, Sample2-Pseudorep1, Sample3-Pseudorep1),
+        (Sample1-Pseudorep2, Sample2-Pseudorep2, Sample3-Pseudorep2)...]
         '''
         self.check_output_dir(options)
         
         idrutils = IdrUtilities()
+        pseudoreps = []
         for tag_dir in options.tag_dirs:
             print('Generating {} pseudoreplicate tag directories for {}'.format(
                                 options.pseudorep_count, tag_dir))
-            idrutils.create_pseudoreps(tag_dir, options.output_dir, 
-                                       count=options.pseudorep_count)
+            pseudoreps += idrutils.create_pseudoreps(tag_dir, 
+                                        options.output_dir, 
+                                        count=options.pseudorep_count)
+        
+        return list(zip(*pseudoreps))
+            
+    def pool_pseudoreplicates(self, options):
+        '''
+        Generate pseudoreplicates for each directory, then pool the pseudoreps.
+        '''
+        if not options.pooled_dir_name:
+            raise Exception('A name for the pooled directory is needed. '
+                            + 'Please indicate one with the --pooled-dir-name option.')
+            
+        pseudorep_sets = self.pseudoreplicate(options)
+        idrutils = IdrUtilities()
+        for i, pseudorep_set in enumerate(pseudorep_sets):
+            idrutils.clean_up_pseudoreps(os.path.join(options.output_dir,
+                                            options.pooled_dir_name + 
+                                            '-Pseudorep' + str(i)), 
+                                     pseudorep_set)
         
     def truncate(self, options, peak_files):
         '''
@@ -127,6 +153,8 @@ if __name__ == '__main__':
             pass
     elif options.command == 'pseudoreplicate':
         parser.pseudoreplicate(options)
+    elif options.command == 'pool-pseudoreplicates':
+        parser.pool_pseudoreplicates(options)
     elif options.command == 'homer2narrow':
         parser.homer2narrow(options)
     elif options.command == 'truncate':
