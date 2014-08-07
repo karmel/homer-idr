@@ -10,7 +10,7 @@ import numpy as np
 from pandas.io.parsers import read_csv
 from collections import OrderedDict
 from pandas import DataFrame, Series
-from random import randint, random
+from random import random
 import math
 import subprocess
 
@@ -29,7 +29,8 @@ class IdrUtilities(object):
         Randomly split a Homer tag directory into two parts with approximately
         equal number of reads.
         
-        @todo: this is super slow. Use shuff at the command line!
+        @todo: this is super slow. Using Python IO is slower... maybe shuf 
+        would be faster? But many systems, OS X included, don't come with shuf.
         '''
         tag_dir_name = os.path.basename(tag_dir)
         # Make destination directories
@@ -37,24 +38,48 @@ class IdrUtilities(object):
         for i in range(1,count + 1):
             pseudo_tag_dirs.append(os.path.join(output_dir, 
                                     tag_dir_name + '-Pseudorep' + str(i)))
-            os.mkdir(pseudo_tag_dirs[i - 1])
-            
+            # Make tmp directory
+            os.mkdir(pseudo_tag_dirs[i - 1] + '-tmp')
+        
         for f in os.listdir(tag_dir):
             # If this is a chr[X].txt file
             if re.match('chr[A-Za-z0-9]+\.tags\.tsv$',f):
-                chr_file = open(os.path.join(tag_dir, f), 'r')
+                chr_file = os.path.join(tag_dir, f)
+                shuffled_file = os.path.join(pseudo_tag_dirs[0] + '-tmp', 
+                                             f + '.tmp')
+                # Shuffle the source chr file:
+                subprocess.check_call("awk 'BEGIN{srand()}{print rand(),$0}' " +
+                                    "{} | sort -n | cut -d ' ' -f2- > {}".format(
+                                    chr_file, shuffled_file), shell=True)
                 
-                open_files = []
-                for dir in pseudo_tag_dirs: 
-                    open_files.append(open(os.path.join(dir, f), 'w+'))
+                # How many lines do we have to split up?
+                line_count = subprocess.check_output('wc -l {}'.format(
+                                    shuffled_file), shell=True)
+                line_count = int(line_count.split()[0])
+                per_file = line_count//count
+                for i in range(1, count+1):
+                    # Output into file.
+                    subprocess.check_call('head -n {} {} | tail -n {} > {}'.format(
+                                i*per_file, shuffled_file, per_file, 
+                                os.path.join(pseudo_tag_dirs[i - 1] + '-tmp', f)),
+                                shell=True)
+        
+                subprocess.check_call('rm {}'.format(shuffled_file), shell=True)
                 
-                for line in chr_file:
-                    # Roll the die and send into appropriate pseudorep
-                    # We don't use randint here because it is very slow!
-                    selected_rep = math.floor(random()*count)
-                    open_files[selected_rep].write(line)
+        # Finally, use Homer to re-make tag directory, as we want
+        # an accurate tagInfo file.
+        # Make sure to use the /usr/bin/env clause to tell Python to look
+        # in the environment's path for Homer.
+        cmd = '/usr/bin/env makeTagDirectory {} -d {}'.format(
+                            pseudo_tag_dirs[i - 1],
+                            pseudo_tag_dirs[i - 1] + '-tmp')
+        print(cmd)
+        subprocess.check_call(cmd.split())
+        subprocess.check_call('rm -rf {}'.format(
+                            pseudo_tag_dirs[i - 1] + '-tmp'), shell=True)
+        
+        return pseudo_tag_dirs
                 
-                for dir in open_files: dir.close() 
                         
     ######################################################
     # Converting Homer Peaks to narrowPeak files

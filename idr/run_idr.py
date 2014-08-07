@@ -93,10 +93,25 @@ class IdrArgumentParser(ArgumentParser):
         return output_files
         
         
-                              
+    
+    def sanitize_inputs(self, options):
+        if not options.peak_files: options.peak_files = []
+        if not options.tag_dirs: options.tag_dirs = []
+        
+        if options.output_dir: 
+            options.output_dir = os.path.normpath(options.output_dir)
+        
+        for i, f in enumerate(options.peak_files):
+            options.peak_files[i] = os.path.normpath(f)
+        for i, f in enumerate(options.tag_dirs):
+            options.tag_dirs[i] = os.path.normpath(f)
+        
+        return options
+
     def check_output_dir(self, options):
         if not options.output_dir:
-            raise Exception('An output directory is needed to run homer2narrow.')
+            raise Exception('An output directory is needed. '
+                            + 'Please indicate one with the -o option.')
         if not os.path.exists(options.output_dir):
             os.makedirs(options.output_dir)
     
@@ -104,6 +119,8 @@ if __name__ == '__main__':
     parser = IdrArgumentParser()
     options = parser.parse_args()
 
+    options = parser.sanitize_inputs(options)
+    
     if options.command == 'idr':
         narrows = parser.homer2narrow(options)
         for narrow_peak in narrows:
