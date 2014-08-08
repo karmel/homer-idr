@@ -10,8 +10,6 @@ import numpy as np
 from pandas.io.parsers import read_csv
 from collections import OrderedDict
 from pandas import DataFrame, Series
-from random import random
-import math
 import subprocess
 
 
@@ -24,7 +22,7 @@ class IdrUtilities(object):
     ######################################################
     # Creating pseudo-replicates
     ######################################################
-    def create_pseudoreps(self, tag_dir, output_dir, count=2):
+    def create_pseudoreps(self, tag_dir, output_dir, count=2, suffix='Pseudorep'):
         '''
         Randomly split a Homer tag directory into two parts with approximately
         equal number of reads.
@@ -37,7 +35,7 @@ class IdrUtilities(object):
         pseudo_tag_dirs = []
         for i in range(1,count + 1):
             pseudo_tag_dirs.append(os.path.join(output_dir, 
-                                    tag_dir_name + '-Pseudorep' + str(i)))
+                                    tag_dir_name + '-{}{}'.format(suffix,i)))
             # Make tmp directory
             os.mkdir(pseudo_tag_dirs[i - 1] + '-tmp')
         
@@ -180,7 +178,7 @@ class IdrUtilities(object):
         output_files = []
         for peak_file in peak_files:
             basename, ext = os.path.splitext(os.path.basename(peak_file))
-            output_file = os.path.join(output_dir, basename + '-truncated.' + ext)
+            output_file = os.path.join(output_dir, basename + '-truncated' + ext)
             subprocess.check_call('head -n {} {} > {}'.format(
                                         min_rows, peak_file, output_file), 
                                   shell=True)
