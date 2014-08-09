@@ -96,21 +96,21 @@ class IdrArgumentParser(ArgumentParser):
         
         
         
-    def homer2narrow(self, options, peak_files, output_dir):
+    def homer2narrow(self, options, peak_files, output_dir=None):
         '''
         Convert passed Homer peak files to narrowPeak files as specified by 
         the IdrUtilities object.
         
         Returns the set of filenames for generated narrowPeak files.
         '''
-        self.check_output_dir(options)
+        self.check_output_dir(output_dir or options.output_dir)
              
         idrutils = IdrUtilities()
         output_files = []
         for peak_file in peak_files:
             # Get extensionless name of file
             basename = os.path.splitext(os.path.basename(peak_file))[0]
-            output_file = os.path.join(options.output_dir, basename + '.narrowPeak')
+            output_file = os.path.join(output_dir, basename + '.narrowPeak')
             
             data = idrutils.import_homer_peaks(peak_file)
             idrutils.homer_to_narrow_peaks(data, output_file)
@@ -127,7 +127,7 @@ class IdrArgumentParser(ArgumentParser):
         [(Sample1-Pseudorep1, Sample2-Pseudorep1, Sample3-Pseudorep1),
         (Sample1-Pseudorep2, Sample2-Pseudorep2, Sample3-Pseudorep2)...]
         '''
-        self.check_output_dir(options)
+        self.check_output_dir(options.output_dir)
         
         idrutils = IdrUtilities()
         pseudoreps = []
@@ -158,15 +158,15 @@ class IdrArgumentParser(ArgumentParser):
                                             '-Pseudorep' + str(i + 1)), 
                                      pseudorep_set)
         
-    def truncate(self, options, peak_files):
+    def truncate(self, options, peak_files, output_dir=None):
         '''
         Truncate SORTED narrowPeak files so that they are all the same length.
         '''
-        self.check_output_dir(options)
+        self.check_output_dir(output_dir or options.output_dir)
         
         idrutils = IdrUtilities()
         output_files = idrutils.standardize_peak_counts(peak_files, 
-                                                        options.output_dir)
+                                                        output_dir)
         
         return output_files
         
@@ -177,7 +177,7 @@ class IdrArgumentParser(ArgumentParser):
         and pseudoreplicate peak files.
         
         '''
-        self.check_output_dir(options)
+        self.check_output_dir(options.output_dir)
         
         peak_sets = [options.peak_files, 
                      options.pseudorep_files, 
@@ -247,13 +247,14 @@ class IdrArgumentParser(ArgumentParser):
                 pooled_files.append(os.path.join(pooled_dir, prefix + suffix))
         
             # Plot all of our pairwise comparisons
-            idrcaller.plot_comparisons(rep_prefixes, replicate_dir, 
+            plot_dir = os.path.join(options.output_dir, 'plots')
+            idrcaller.plot_comparisons(rep_prefixes, plot_dir, 
                                        output_prefix='Replicate_comparison')
             
-            idrcaller.plot_comparisons(pseudorep_prefixes, replicate_dir, 
+            idrcaller.plot_comparisons(pseudorep_prefixes, plot_dir, 
                                        output_prefix='Pseudorep_comparison')
             
-            idrcaller.plot_comparisons(pooled_prefixes, replicate_dir, 
+            idrcaller.plot_comparisons(pooled_prefixes, plot_dir, 
                                        output_prefix='Pooled_pseudorep_comparison')
          
         else:

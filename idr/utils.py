@@ -284,5 +284,5 @@ class IdrUtilities(object):
         basename, ext = os.path.splitext(os.path.basename(peak_file))
         output_file = os.path.join(output_dir, basename + '-top-set' + ext)
         data.to_csv(output_file, sep='\t', header=False, index=False, 
-                    line_terminator='\r')
+                    line_terminator='\r\n')
         return output_file
