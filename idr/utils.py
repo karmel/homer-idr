@@ -19,6 +19,9 @@ class IdrUtilities(object):
     necessary to run the IDR R code.
     '''
     
+    p_value_columns = ['p-value vs Control', 'p-value vs Local', 'p-value']
+    tag_count_columns = ['Normalized Tag Count', 'findPeaks Score', 
+                         'score', 'Total Tags']
     ######################################################
     # Creating pseudo-replicates
     ######################################################
@@ -135,8 +138,8 @@ class IdrUtilities(object):
             ('name', self.get_first_column(data, ['#PeakID','PeakID','ID','name'])),
             ('score', Series([0]*data.shape[0])), # Leave zero so that signalValue column is used
             ('strand', self.get_first_column(data, ['strand'])),       
-            ('signalValue', self.get_first_column(data, ['Normalized Tag Count', 'findPeaks Score', 'score', 'Total Tags'])),
-            ('pValue', -np.log10(self.get_first_column(data, ['p-value vs Control', 'p-value vs Local', 'p-value']))),
+            ('signalValue', self.get_first_column(data, self.tag_count_columns)),
+            ('pValue', -np.log10(self.get_first_column(data, self.p_value_columns))),
             ('qValue', Series([-1]*data.shape[0])), # Leave -1 as no individual FDR is called for each peak
             ('peak', Series([-1]*data.shape[0])), # Leave -1 as no point-source is called for each peak
             ))
@@ -185,4 +188,101 @@ class IdrUtilities(object):
             output_files.append(output_file)
         
         return output_files
+
+
+    ######################################################
+    # Post-processing
+    ######################################################
+    def determine_threshold(self, number_of_peaks, pooled=False):
+        '''
+        From the IDR documentation:
+        
+            - If you started with ~150 to 300K relaxed pre-IDR peaks for 
+            large genomes (human/mouse), then threshold of 0.01 or 0.02 
+            generally works well. 
+            - If you started with < 100K pre-IDR peaks for large genomes 
+            (human/mouse), then threshold of 0.05 is more appropriate.
             
+            - If you started with ~150 to 300K relaxed pre-IDR peaks for large 
+            genomes (human/mouse), then threshold of 0.0025 or 0.005 generally 
+            works well. We use a tighter threshold for pooled-consistency 
+            since pooling and subsampling equalizes the pseudo-replicates in 
+            terms of data quality. So we err on the side of caution and 
+            use more stringent thresholds. The equivalence between a 
+            pooled-consistency threshold of 0.0025 and original replicate 
+            consistency threshold of 0.01 was calibrated based on a 
+            gold-standard pair of high quality replicate datasets for the CTCF 
+            transcription factor in human. 
+        
+        So, we set 75K peaks and below at .05, then progress linearly to .01
+        at 300K peaks.
+        Similarly for pooled, but there we move from .0125 to .0025.
+        '''
+        if pooled: few_peaks, many_peaks = .0125, .0025
+        else: few_peaks, many_peaks = .05, .01
+        
+        # Set up our linear equation, y = mx+b,
+        # where x is the number of peaks and y is the desired threshold.
+        m = (few_peaks - many_peaks)/(75000 - 300000)
+        b = .01 - m*300000
+        threshold = m*number_of_peaks + b
+        print('Threshold: ' + str(threshold))
+        
+        return threshold
+    
+    def get_peaks_within_threshold(self, threshold, idr_files):
+        '''
+        For the generated IDR files, determine the greatest number
+        that are within the given threshold.
+        
+        Meanwhile, compare counts across all the files. If any are
+        substantially different (>2-fold), issue a warning.
+        '''
+        counts = []
+        for filename in idr_files:
+            data = read_csv(filename, sep=" ", header=0)
+            within_thresh = len(data[data['IDR'] <= threshold])
+            counts.append(within_thresh)
+            
+        if min(counts)*2 < max(counts):
+            print('!! Warning: There is a large discrepancy between the number'
+                  + ' of peaks within the threshold for each pair of compared'
+                  + ' peak files. Please check individual output files and'
+                  + ' determine whether one replicate is not like the others.')
+            
+        return max(counts)
+    
+    def slice_peaks(self, peak_file, number_of_peaks, 
+                    ranking_measure, output_dir):
+        '''
+        Given a Homer tag file, import the file and output just the 
+        specified number of peaks.
+        '''
+        data = self.import_homer_peaks(peak_file)
+        
+        sort_col = None
+        if ranking_measure == 'p-value':
+            ascending = True
+            for col_name in self.p_value_columns: 
+                if col_name in data.columns:
+                    sort_col = col_name
+                    break
+        else:
+            ascending = False
+            for col_name in self.tag_count_columns: 
+                if col_name in data.columns:
+                    sort_col = col_name
+                    break
+        if not sort_col:
+            raise Exception('Could not find column to sort final peaks by!')
+            
+        data = data.sort([sort_col], ascending=ascending)
+        data = data[:number_of_peaks]
+        
+        # Output to file
+        # Use the \r line ending because that is what Homer expects.
+        basename, ext = os.path.splitext(os.path.basename(peak_file))
+        output_file = os.path.join(output_dir, basename + '-top-set' + ext)
+        data.to_csv(output_file, sep='\t', header=False, index=False, 
+                    line_terminator='\r')
+        return output_file

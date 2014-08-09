@@ -23,13 +23,13 @@ class IdrCaller(object):
         for file_1, file_2 in pairs:
             # Skip self-comparisons
             if file_1 == file_2: continue
-            
+
             file_1_name = os.path.splitext(os.path.basename(file_1))[0]
             file_2_name = os.path.splitext(os.path.basename(file_2))[0]
             filename = '{}-{}'.format(file_1_name, file_2_name)
             output_prefix = os.path.join(output_dir, filename)
-            #self.run_batch_analysis(file_1, file_2, output_prefix, 
-            #                        ranking_measure=ranking_measure)
+            self.run_batch_analysis(file_1, file_2, output_prefix, 
+                                    ranking_measure=ranking_measure)
             prefixes.append(output_prefix)
         return prefixes
         
@@ -86,7 +86,7 @@ class IdrCaller(object):
         '''
         # Make sure to cd into idrCode dir, as the r scripts call other scripts
         # assuming they are in the same directory.
-        cmd = 'cd idrCode Rscript batch-consistency-plot.r'\
+        cmd = 'cd idrCode && Rscript batch-consistency-plot.r'\
                               + ' {} {} {}'.format(
                                 len(comparison_files),
                                 os.path.join(output_dir,output_prefix),
@@ -95,5 +95,4 @@ class IdrCaller(object):
         print(cmd)
         subprocess.check_call(cmd, shell=True)
         
-        
-        
+    
