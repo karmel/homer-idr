@@ -134,6 +134,19 @@ For example, to call peaks for a H3K4me2 histone chip-seq data set, I run:
 
 Make sure to use the same parameters for all replicates.
 
+#### 4. Call peaks on the pooled tag directory.
+
+Make sure to use the **same permissive parameters** from above. For example:
+
+
+	cd ~/CD4TCell-IDR
+	mkdir -p peaks/pooled
+	cd peaks/pooled
+	findPeaks ~/CD4TCell-IDR/CD4TCell-H3K4me2-Combined -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o CD4TCell-H3K4me2-Combined_peaks.txt
+
+Make sure to use the same parameters for all replicates.
+
+
 #### 5. Create pseudo-replicates for each replicate directory.
 
 We want to split the tags in each replicate randomly, so that we can analyze each replicate for internal consistency. For example:
@@ -145,7 +158,7 @@ We want to split the tags in each replicate randomly, so that we can analyze eac
 
 Note: This process takes longer than expected. I am using `awk` and other command line tools to shuffle the tag order then split, so I feel like it should be relatively fast, but it's not. Let me know if you know of a better cross-platform way to complete this task.
 
-#### 5. Create pseudo-replicates for the pooled directory.
+#### 6. Create pseudo-replicates for the pooled directory.
 
 We repeat the pseudoreplication process for our pooled tag directory. For example:
 
@@ -154,7 +167,7 @@ We repeat the pseudoreplication process for our pooled tag directory. For exampl
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
 	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
 
-#### 6. Call peaks on each of the individual pseudo-replicate tag directories.
+#### 7. Call peaks on each of the individual pseudo-replicate tag directories.
 
 Make sure to use the **same permissive parameters** from above. For example:
 
@@ -166,21 +179,45 @@ Make sure to use the **same permissive parameters** from above. For example:
 		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
 		done
 
-#### 7. Call peaks on each of the pooled pseudo-replicate tag directories.
+#### 8. Call peaks on each of the pooled pseudo-replicate tag directories.
 
 Again, use the **same permissive parameters** from above. 
 
 	cd ~/CD4TCell-IDR
-	mkdir -p peaks/pooled
-	cd peaks/pooled 
-	for f in ~/CD4TCell-IDR/pseudoreps/pooled/*
+	mkdir -p peaks/pooled-pseudoreps
+	cd peaks/pooled-pseudoreps
+	for f in ~/CD4TCell-IDR/pseudoreps/pooled-pseudoreps/*
 		do
 		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
 		done
 
-#### 8. Run IDR analysis.
+#### 9. Run IDR analysis.
 
+Now that we have all of our peak files prepped, we can run the IDR analysis.
 
+To sum the steps above, we need:
+
+- Peaks from each of our replicates.
+- Peaks from the pooled replicates.
+- Peaks from each of the individual pseudo-replicates.
+- Peaks from the pooled pseudo-replicates.
+
+These sets of peaks then get fed into the run_idr.py program:
+
+	# python run_idr.py idr -p [replicate peaks] \
+	#	-pr [pseudorep peaks] \
+	#	-ppr [pooled pseudorep peaks] \
+	#	--pooled_peaks [pooled replicate peak file]
+	#	-o [output directory to create]
+
+Continuing our example, then:
+
+	python ~/software/homer-idr/homer-idr/run_idr.py idr \
+	-p ~/CD4TCell-IDR/peaks/replicates/* \
+	-pr ~/CD4TCell-IDR/peaks/pseudoreps/* \
+	-ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps \
+	--pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt \
+	-o ~/CD4TCell-IDR/idr-output
 
 
 
