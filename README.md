@@ -251,5 +251,24 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 		python ~/software/homer-idr/homer-idr/run_idr.py --help
 
-- 
+- If you want to try using different threshold values, you do not need to re-run the whole process. Just set the threshold manually, and pass in the already-processed IDR -overlapped-peaks.txt files like so:
+
+		python ~/software/homer-idr/homer-idr/run_idr.py idr \
+		--rep_idr_peaks ~/CD4TCell-IDR/idr-output/replicate_comparisons/*overlapped-peaks.txt \
+		--pseudorep_idr_peaks ~/CD4TCell-IDR/idr-output/pseudorep_comparisons/*overlapped-peaks.txt \
+		--pooled_idr_peaks ~/CD4TCell-IDR/idr-output/pooled_comparisons/*overlapped-peaks.txt \
+		--pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt \
+		--threshold .04 --pooled_threshold .003 \
+		-o ~/CD4TCell-IDR/idr-output-2
+
+- By defauly, homer-idr uses the Normalized Tag Count to sort and compare peaks. If you would like to use p-value instead, use the parameter `--ranking_measure` when running the `idr` command:
+
+		--ranking_measure p-value
+
+- homer-idr can also be used to convert Homer peak files to narrowPeak files, or to truncate narrowPeak files to the same lenght:
+
+		python ~/software/homer-idr/homer-idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
+
+		python ~/software/homer-idr/homer-idr/run_idr.py truncate -p ~/narrowPeak_files/* -o ~/truncated_files
+		
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
