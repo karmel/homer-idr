@@ -232,4 +232,13 @@ The homer-idr program will take the input peaks and do the following:
 5. Determine how many peaks should be kept in the final set based on the IDR threshold.
 6. Sort the Homer peaks from the pooled replicate set and output a final Homer peak file with the chosen number of peaks.
 
+In the specified output directory, you will find:
+
+- The narrowPeak and truncated narrowPeak files that were created.
+- The output from the [IDR R package][IDR], which includes
+	- An -overlapped-peaks.txt file for each peak file, which lists peaks and their IDR statistics,
+	- An -aboveIDR.txt file for each peak file, which lists how many peaks pass given IDR thresholds, and
+	- A plots directory that contains generate plots comparing the replicates and pseudoreplicates.
+- A final Homer peak file that has the peaks from the pooled replicate peak set cut off with only the top selected peaks. These are the peaks considered confident and likely real based on the IDR analysis.
+
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
