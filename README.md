@@ -13,6 +13,7 @@ Last updated 2014-08.
 2. [Open Questions](#open-questions)
 3. [Installation](#installation)
 4. [Using homer-idr](#using-homer-idr)
+5. [Other Usage Notes](#other-usage-notes)
 
 ## Introduction
 
@@ -239,6 +240,13 @@ In the specified output directory, you will find:
 	- An -overlapped-peaks.txt file for each peak file, which lists peaks and their IDR statistics,
 	- An -aboveIDR.txt file for each peak file, which lists how many peaks pass given IDR thresholds, and
 	- A plots directory that contains generate plots comparing the replicates and pseudoreplicates.
-- A final Homer peak file that has the peaks from the pooled replicate peak set cut off with only the top selected peaks. These are the peaks considered confident and likely real based on the IDR analysis.
+- A **final Homer peak file**, named like the input `--pooled_peaks` file but suffixed with -top-set.txt, that has the peaks from the pooled replicate peak set cut off with only the top selected peaks. These are the peaks considered confident and likely real based on the IDR analysis.
+
+The final Homer peak file can then be used for subsequent analysis with Homer or other programs to your replicated heart's content!
+
+
+## Other Usage Notes
+
+
 
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
