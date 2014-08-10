@@ -247,6 +247,9 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 ## Other Usage Notes
 
+- When in doubt, ask for help:
 
+		python ~/software/homer-idr/homer-idr/run_idr.py --help
 
+- 
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
