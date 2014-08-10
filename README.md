@@ -24,7 +24,7 @@ The canonical IDR pipeline calls peaks with SPP or MACS. We here present some me
 
 There are many open questions about the best way to incorporate multiple replicates with IDR. I will highlight two below that seem especially pressing.
 
-### 1. How should we be calling peaks? 
+#### 1. How should we be calling peaks? 
 
 The peaks that are input to IDR analysis are key to the output that is generated, so it is crucial to have high-quality peaks going in. The instructions for IDR indicate that peaks should be called permissively, such that a great proportion of the input peaks are just noise. The authors of the R package we are using suggest calling 150,000 to 300,000 peaks using SPP or about 100,000 using MACS.
 
@@ -38,7 +38,7 @@ That is, p-value over input of up to .1, p-value over local tag count of up to .
 
 Suggestions on how to best call peaks to all for lots of noise but not disturb the integrity of individual peaks much appreciated!
 
-### 2. How should we set the IDR threshold?
+#### 2. How should we set the IDR threshold?
 
 The IDR statistic is called algorithmically over a replicate set, but where to draw the line that separates noise from real peaks is determined by the user. According to the authors of the IDR package, the following guidelines apply:
 
