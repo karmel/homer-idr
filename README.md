@@ -54,7 +54,7 @@ generally works well."
 - "If you started with ~150 to 300K relaxed pre-IDR peaks for large 
 genomes (human/mouse), then threshold of 0.0025 or 0.005 generally 
 works well. We use a tighter threshold for pooled-consistency 
-since pooling and subsampling equalizes the pseudo-replicates in 
+since pooling and subsampling equalizes the pseudoreplicates in 
 terms of data quality. So we err on the side of caution and 
 use more stringent thresholds. The equivalence between a 
 pooled-consistency threshold of 0.0025 and original replicate 
@@ -147,7 +147,7 @@ Make sure to use the **same permissive parameters** from above. For example:
 Make sure to use the same parameters for all replicates.
 
 
-#### 5. Create pseudo-replicates for each replicate directory.
+#### 5. Create pseudoreplicates for each replicate directory.
 
 We want to split the tags in each replicate randomly, so that we can analyze each replicate for internal consistency. For example:
 
@@ -158,7 +158,7 @@ We want to split the tags in each replicate randomly, so that we can analyze eac
 
 Note: This process takes longer than expected. I am using `awk` and other command line tools to shuffle the tag order then split, so I feel like it should be relatively fast, but it's not. Let me know if you know of a better cross-platform way to complete this task.
 
-#### 6. Create pseudo-replicates for the pooled directory.
+#### 6. Create pseudoreplicates for the pooled directory.
 
 We repeat the pseudoreplication process for our pooled tag directory. For example:
 
@@ -167,7 +167,7 @@ We repeat the pseudoreplication process for our pooled tag directory. For exampl
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
 	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
 
-#### 7. Call peaks on each of the individual pseudo-replicate tag directories.
+#### 7. Call peaks on each of the individual pseudoreplicate tag directories.
 
 Make sure to use the **same permissive parameters** from above. For example:
 
@@ -179,7 +179,7 @@ Make sure to use the **same permissive parameters** from above. For example:
 		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
 		done
 
-#### 8. Call peaks on each of the pooled pseudo-replicate tag directories.
+#### 8. Call peaks on each of the pooled pseudoreplicate tag directories.
 
 Again, use the **same permissive parameters** from above. 
 
@@ -199,8 +199,8 @@ To sum the steps above, we need:
 
 - Peaks from each of our replicates.
 - Peaks from the pooled replicates.
-- Peaks from each of the individual pseudo-replicates.
-- Peaks from the pooled pseudo-replicates.
+- Peaks from each of the individual pseudoreplicates.
+- Peaks from the pooled pseudoreplicates.
 
 These sets of peaks then get fed into the run_idr.py program:
 
@@ -212,6 +212,10 @@ These sets of peaks then get fed into the run_idr.py program:
 
 Continuing our example, then:
 
+	python ~/software/homer-idr/homer-idr/run_idr.py idr -p ~/CD4TCell-IDR/peaks/replicates/* -pr ~/CD4TCell-IDR/peaks/pseudoreps/* -ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps --pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt -o ~/CD4TCell-IDR/idr-output
+
+The same command, separated out into multiple lines for readability:
+
 	python ~/software/homer-idr/homer-idr/run_idr.py idr \
 	-p ~/CD4TCell-IDR/peaks/replicates/* \
 	-pr ~/CD4TCell-IDR/peaks/pseudoreps/* \
@@ -219,6 +223,13 @@ Continuing our example, then:
 	--pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt \
 	-o ~/CD4TCell-IDR/idr-output
 
+The homer-idr program will take the input peaks and do the following:
 
+1. Convert the Homer peak files into the Encode narrowPeak format.
+2. Truncate the narrowPeak files such that each replicate, pseudoreplicate, and pooled pseudoreplicate set has the same number of peaks.
+3. Use the [IDR R package][IDR] to calculate the IDR statistic on the truncated narrowPeak files.
+4. Calculate the IDR threshold to use for filtering (see [above](#2-how-should-we-set-the-idr-threshold) for more detail on how the threshold is selected).
+5. Determine how many peaks should be kept in the final set based on the IDR threshold.
+6. Sort the Homer peaks from the pooled replicate set and output a final Homer peak file with the chosen number of peaks.
 
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
