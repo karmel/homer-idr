@@ -28,7 +28,9 @@ class IdrArgumentParser(ArgumentParser):
         super().__init__(description=description)
         
         self.add_argument('command', 
-                help='Program to run; options are: idr, homer2narrow'),
+                help='Program to run; options are: idr, '
+                + 'pseudoreplicate, pool-pseudoreplicates, '
+                + 'homer2narrow, truncate.'),
         
         self.add_argument('-o','--output_dir', nargs='?', dest='output_dir',
                 help='Directory name in which output files will be placed. ' +

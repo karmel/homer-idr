@@ -5,6 +5,8 @@ A small package for applying Irreproducibility Discovery Rate (IDR) analysis for
 
 Questions? Comments? Email me: <karmel@arcaio.com>
 
+Last updated 2014-08.
+
 ## TOC
 
 1. [Introduction](#introduction)
@@ -14,7 +16,7 @@ Questions? Comments? Email me: <karmel@arcaio.com>
 
 ## Introduction
 
-The Irreproducibility Discovery Rate (IDR) statistic has been adopted by Encode in order to incorporate and interpret replicates in chip-sequencing experiments. [A procedure and an R package](https://sites.google.com/site/anshulkundaje/projects/idr) have been developed to calculate the IDR statistic and call peaks accordingly; I highly suggest you read through the documentation there for a full understanding of what we are doing here.
+The Irreproducibility Discovery Rate (IDR) statistic has been adopted by Encode in order to incorporate and interpret replicates in chip-sequencing experiments. [A procedure and an R package][IDR] have been developed to calculate the IDR statistic and call peaks accordingly; I highly suggest you read through the documentation there for a full understanding of what we are doing here.
 
 The canonical IDR pipeline calls peaks with SPP or MACS. We here present some methods that (A) allow for the use of Homer peaks, and (B) make some of the initial data prep methods easier.
 
@@ -74,7 +76,7 @@ To install homer-idr, clone the github repository into the directory from which 
 
 For example:
 
-	cd /home/me/software
+	cd ~/software
 	mkdir homer-idr
 	cd homer-idr
 	git clone https://github.com/karmel/homer-idr.git
@@ -94,10 +96,92 @@ Or, for less frequent use, you can just set the `PYTHONPATH` immediately before 
 
 You should now be able to run the run_idr.py script:
 
-	python /home/me/software/homer-idr/homer-idr/run_idr.py --help
+	python ~/software/homer-idr/homer-idr/run_idr.py --help
 
 
 ## Using homer-idr
 
+The procedure described here is a recapitulation of the procedure defined in the [IDR package][IDR] (as of 2014-08), but using Homer and homer-idr. For full explanations and more detail, please refer to the [IDR package][IDR] documentation.
+
+#### 1. Create a combined input tag directory.
+
+If you have separate inputs for each of your replicates, combine them all into one big input directory. For example:
+
+	mkdir ~/CD4TCell-IDR
+	cd ~/CD4TCell-IDR
+	makeTagDirectory CD4TCell-Input-Combined -d /data/CD4TCell-Input-1 /data/CD4TCell-Input-2 /data/CD4TCell-Input-3
+
+#### 2. Create a pooled replicate tag directory.
+
+As with the inputs, you want one tag directory that combines all the separate replicate tag directories. For example:
+
+	cd ~/CD4TCell-IDR
+	makeTagDirectory CD4TCell-H3K4me2-Combined -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3
 
 
+#### 3. Permissively call peaks for each of your replicates using the combined input.
+
+As discussed [above](#1-how-should-we-be-calling-peaks), IDR requires that we first call peaks permissively, such that a large proportion are actually noise. Read [above](#1-how-should-we-be-calling-peaks) for more detail on this, but I have been using the following Homer parameters to call peaks permissively:
+
+	-P .1 -LP .1 -poisson .1
+
+For example, to call peaks for a H3K4me2 histone chip-seq data set, I run:
+
+	cd ~/CD4TCell-IDR
+	mkdir -p peaks/replicates
+	cd peaks/replicates
+	findPeaks /data/CD4TCell-H3K4me2-1 -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o CD4TCell-H3K4me2-1_peaks.txt
+
+Make sure to use the same parameters for all replicates.
+
+#### 5. Create pseudo-replicates for each replicate directory.
+
+We want to split the tags in each replicate randomly, so that we can analyze each replicate for internal consistency. For example:
+
+	cd ~/CD4TCell-IDR
+	mkdir -p pseudoreps/individual
+	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
+	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3 -o pseudoreps/individual
+
+Note: This process takes longer than expected. I am using `awk` and other command line tools to shuffle the tag order then split, so I feel like it should be relatively fast, but it's not. Let me know if you know of a better cross-platform way to complete this task.
+
+#### 5. Create pseudo-replicates for the pooled directory.
+
+We repeat the pseudoreplication process for our pooled tag directory. For example:
+
+	cd ~/CD4TCell-IDR
+	mkdir -p pseudoreps/pooled
+	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
+	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
+
+#### 6. Call peaks on each of the individual pseudo-replicate tag directories.
+
+Make sure to use the **same permissive parameters** from above. For example:
+
+	cd ~/CD4TCell-IDR
+	mkdir -p peaks/pseudoreps
+	cd peaks/pseudoreps 
+	for f in ~/CD4TCell-IDR/pseudoreps/individual/*
+		do
+		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
+		done
+
+#### 7. Call peaks on each of the pooled pseudo-replicate tag directories.
+
+Again, use the **same permissive parameters** from above. 
+
+	cd ~/CD4TCell-IDR
+	mkdir -p peaks/pooled
+	cd peaks/pooled 
+	for f in ~/CD4TCell-IDR/pseudoreps/pooled/*
+		do
+		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
+		done
+
+#### 8. Run IDR analysis.
+
+
+
+
+
+[IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
