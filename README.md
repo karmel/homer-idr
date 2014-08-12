@@ -97,7 +97,7 @@ Or, for less frequent use, you can just set the `PYTHONPATH` immediately before 
 
 You should now be able to run the run_idr.py script:
 
-	python ~/software/homer-idr/homer-idr/run_idr.py --help
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py --help
 
 
 ## Using homer-idr
@@ -155,7 +155,7 @@ We want to split the tags in each replicate randomly, so that we can analyze eac
 	cd ~/CD4TCell-IDR
 	mkdir -p pseudoreps/individual
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
-	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3 -o pseudoreps/individual
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3 -o pseudoreps/individual
 
 Note: This process takes longer than expected. I am using `awk` and other command line tools to shuffle the tag order then split, so I feel like it should be relatively fast, but it's not. Let me know if you know of a better cross-platform way to complete this task.
 
@@ -166,7 +166,7 @@ We repeat the pseudoreplication process for our pooled tag directory. For exampl
 	cd ~/CD4TCell-IDR
 	mkdir -p pseudoreps/pooled
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
-	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
 
 #### 7. Call peaks on each of the individual pseudoreplicate tag directories.
 
@@ -213,11 +213,11 @@ These sets of peaks then get fed into the run_idr.py program:
 
 Continuing our example, then:
 
-	python ~/software/homer-idr/homer-idr/run_idr.py idr -p ~/CD4TCell-IDR/peaks/replicates/* -pr ~/CD4TCell-IDR/peaks/pseudoreps/* -ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps --pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt -o ~/CD4TCell-IDR/idr-output
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py idr -p ~/CD4TCell-IDR/peaks/replicates/* -pr ~/CD4TCell-IDR/peaks/pseudoreps/* -ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps --pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt -o ~/CD4TCell-IDR/idr-output
 
 The same command, separated out into multiple lines for readability:
 
-	python ~/software/homer-idr/homer-idr/run_idr.py idr \
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py idr \
 	-p ~/CD4TCell-IDR/peaks/replicates/* \
 	-pr ~/CD4TCell-IDR/peaks/pseudoreps/* \
 	-ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps \
@@ -249,11 +249,11 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 - When in doubt, ask for help:
 
-		python ~/software/homer-idr/homer-idr/run_idr.py --help
+		python ~/software/homer-idr/homer-idr/idr/run_idr.py --help
 
 - If you want to try using different threshold values, you do not need to re-run the whole process. Just set the threshold manually, and pass in the already-processed IDR -overlapped-peaks.txt files like so:
 
-		python ~/software/homer-idr/homer-idr/run_idr.py idr \
+		python ~/software/homer-idr/homer-idr/idr/run_idr.py idr \
 		--rep_idr_peaks ~/CD4TCell-IDR/idr-output/replicate_comparisons/*overlapped-peaks.txt \
 		--pseudorep_idr_peaks ~/CD4TCell-IDR/idr-output/pseudorep_comparisons/*overlapped-peaks.txt \
 		--pooled_idr_peaks ~/CD4TCell-IDR/idr-output/pooled_comparisons/*overlapped-peaks.txt \
@@ -267,8 +267,8 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 - homer-idr can also be used to convert Homer peak files to narrowPeak files, or to truncate narrowPeak files to the same lenght:
 
-		python ~/software/homer-idr/homer-idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
+		python ~/software/homer-idr/homer-idr/idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
 
-		python ~/software/homer-idr/homer-idr/run_idr.py truncate -p ~/narrowPeak_files/* -o ~/truncated_files
+		python ~/software/homer-idr/homer-idr/idr/run_idr.py truncate -p ~/narrowPeak_files/* -o ~/truncated_files
 		
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
