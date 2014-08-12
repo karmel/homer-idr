@@ -214,7 +214,6 @@ class IdrArgumentParser(ArgumentParser):
                                             output_dir=narrowpeak_dir)
                 truncated = self.truncate(options, peak_files=narrows,
                                           output_dir=narrowpeak_dir)
-                print('Files truncated to {} rows.'.format(len(truncated[0])))
                 
                 # Split back out into two separate groups
                 rep_truncated = truncated[:len(options.peak_files)]

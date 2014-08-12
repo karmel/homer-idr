@@ -218,6 +218,8 @@ class IdrUtilities(object):
         at 300K peaks.
         Similarly for pooled, but there we move from .0125 to .0025.
         '''
+        print('Determining threshold based on {} peaks.'.format(number_of_peaks))
+        
         if pooled: few_peaks, many_peaks = .0125, .0025
         else: few_peaks, many_peaks = .05, .01
         
