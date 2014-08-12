@@ -267,7 +267,7 @@ class IdrArgumentParser(ArgumentParser):
         # We need the number of peaks input into analysis
         # to automatically determine a threshold
         try:
-            number_of_peaks = len(rep_truncated[0])
+            number_of_peaks = len(open(rep_truncated[0], 'r').readlines())
         except Exception:
             # We skipped truncating our peaks; expect number of peaks
             # OR a threshold.
