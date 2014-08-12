@@ -250,6 +250,7 @@ class IdrArgumentParser(ArgumentParser):
         
             # Plot all of our pairwise comparisons
             plot_dir = os.path.join(options.output_dir, 'plots')
+            if not os.path.exists(plot_dir): os.mkdir(plot_dir)
             idrcaller.plot_comparisons(rep_prefixes, plot_dir, 
                                        output_prefix='Replicate_comparison')
             

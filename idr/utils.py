@@ -283,6 +283,6 @@ class IdrUtilities(object):
         # Use the \r line ending because that is what Homer expects.
         basename, ext = os.path.splitext(os.path.basename(peak_file))
         output_file = os.path.join(output_dir, basename + '-top-set' + ext)
-        data.to_csv(output_file, sep='\t', header=False, index=False, 
+        data.to_csv(output_file, sep='\t', header=True, index=False, 
                     line_terminator='\r\n')
         return output_file
