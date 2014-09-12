@@ -11,13 +11,16 @@
 # [input.file.prefix 1, 2, 3]: prefix for the output from batch-consistency-analysis2. They are the input files for merged analysis see below for examples (i.e. saved.file.prefix). It can be multiple files
 #
 
+args <- commandArgs(trailingOnly=F)
+
+script.basename <- dirname(sub("--file=","",args[grep("--file",args)]))
 args <- commandArgs(trailingOnly=T)
 npair <- args[1] # number of curves to plot on the same figure
 output.file.prefix <- args[2] # file name for plot, generated from script at the outer level
 df.txt <- 10
 ntemp <- as.numeric(npair)
 saved.file.prefix <- list() # identifier of filenames that contain the em and URI results
-source("functions-all-clayton-12-13.r")
+source(paste(sep="/", script.basename,"functions-all-clayton-12-13.r"))
 
 uri.list <- list()
 uri.list.match <- list()

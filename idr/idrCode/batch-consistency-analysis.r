@@ -16,6 +16,9 @@
 # is.broadpeak: a logical value. If broadpeak is used, set as T; if narrowpeak is used, set as F
 # sig.value: type of significant values, "q.value", "p.value" or "signal.value" (default, i.e. fold of enrichment)
 
+args <- commandArgs(trailingOnly=F)
+
+script.basename <- dirname(sub("--file=","",args[grep("--file",args)]))
 args <- commandArgs(trailingOnly=T)
 
 # consistency between peakfile1 and peakfile2
@@ -52,10 +55,10 @@ sig.value <- args[7]
 #sig.value <- "signal.value"
 
 
-source("functions-all-clayton-12-13.r")
+source(paste(sep="/", script.basename,"functions-all-clayton-12-13.r"))
 
 # read the length of the chromosomes, which will be used to concatenate chr's
-chr.file <- "genome_table.txt"
+chr.file <- paste(sep="/", script.basename,"genome_table.txt")
 
 chr.size <- read.table(chr.file)
 
