@@ -272,7 +272,7 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 		--ranking_measure p-value
 
-- homer-idr can also be used to convert Homer peak files to narrowPeak files, or to truncate narrowPeak files to the same lenght:
+- homer-idr can also be used to convert Homer peak files to narrowPeak files, or to truncate narrowPeak files to the same length:
 
 		python ~/software/homer-idr/homer-idr/idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
 
