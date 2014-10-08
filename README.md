@@ -94,7 +94,11 @@ And add the lines:
 	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
 	export PYTHONPATH
 
-Or, for less frequent use, you can just set the `PYTHONPATH` immediately before running, at the command line:
+After saving your updated bash_profile, make sure to reload it with the command:
+
+	source ~/.bash_profile
+
+Alternatively, for less frequent use, you can just set the `PYTHONPATH` immediately before running, at the command line:
 
 	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
 
