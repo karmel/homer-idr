@@ -14,12 +14,12 @@ for computing IDR that is referenced by Encode:
 https://sites.google.com/site/anshulkundaje/projects/idr 
 
 '''
-import os
 from argparse import ArgumentParser
-from idr.utils import IdrUtilities
-from idr.idr_caller import IdrCaller
 import math
+import os
 
+from idr.idr_caller import IdrCaller
+from idr.utils import IdrUtilities
 class IdrArgumentParser(ArgumentParser):
     def __init__(self):
         description = '''Functions for running Irreproducibility Discovery Rate
@@ -105,7 +105,8 @@ class IdrArgumentParser(ArgumentParser):
         
         Returns the set of filenames for generated narrowPeak files.
         '''
-        self.check_output_dir(output_dir or options.output_dir)
+        output_dir = output_dir or options.output_dir
+        self.check_output_dir(output_dir)
              
         idrutils = IdrUtilities()
         output_files = []

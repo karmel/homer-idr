@@ -131,6 +131,15 @@ class IdrUtilities(object):
         
         '''
 
+        # We don't want to require p-value, as Homer doesn't always output it.
+        # Prep it here if it exists, or substitute tag count.
+        pval_col = self.get_first_column(data,
+            self.p_value_columns, required=False)
+        if pval_col:
+            pvals = -np.log10(pval_col)
+        else: 
+            pvals = pvals = [-1]*data.shape[0]
+            
         columns = OrderedDict((
             ('chrom', self.get_first_column(data, ['chr','chrom', 'chromosome'])),
             ('chromStart', self.get_first_column(data, ['chromStart','start'])),
@@ -139,9 +148,7 @@ class IdrUtilities(object):
             ('score', Series([0]*data.shape[0])), # Leave zero so that signalValue column is used
             ('strand', self.get_first_column(data, ['strand'])),       
             ('signalValue', self.get_first_column(data, self.tag_count_columns)),
-            ('pValue', (-np.log10(self.get_first_column(data,
-                self.p_value_columns, required=False))
-                or self.get_first_column(data, self.tag_count_columns))), # P-value if it exists, or tag count
+            ('pValue', pvals), # P-value if it exists, or tag count
             ('qValue', Series([-1]*data.shape[0])), # Leave -1 as no individual FDR is called for each peak
             ('peak', Series([-1]*data.shape[0])), # Leave -1 as no point-source is called for each peak
             ))
