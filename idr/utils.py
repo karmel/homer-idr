@@ -139,24 +139,29 @@ class IdrUtilities(object):
             ('score', Series([0]*data.shape[0])), # Leave zero so that signalValue column is used
             ('strand', self.get_first_column(data, ['strand'])),       
             ('signalValue', self.get_first_column(data, self.tag_count_columns)),
-            ('pValue', -np.log10(self.get_first_column(data, self.p_value_columns))),
+            ('pValue', (-np.log10(self.get_first_column(data,
+                self.p_value_columns, required=False))
+                or self.get_first_column(data, self.tag_count_columns))), # P-value if it exists, or tag count
             ('qValue', Series([-1]*data.shape[0])), # Leave -1 as no individual FDR is called for each peak
             ('peak', Series([-1]*data.shape[0])), # Leave -1 as no point-source is called for each peak
             ))
         df = DataFrame(columns)
-        df = df.sort(['signalValue','pValue'], ascending=False)
+        df = df.sort(['signalValue', 'pValue'], ascending=False)
         df.to_csv(output_file, sep='\t', header=False, index=False)
         
-    def get_first_column(self, data, names):
+    def get_first_column(self, data, names, required=True):
         '''
-        Given a dataset and a list of strings, return the first column that 
+        Given a dataset and a list of strings, return the first column that
         exists from the passed names.
         '''
         for name in names:
             try: return data[name]
             except KeyError: pass
-        raise Exception(
-            'None of the columns "{}" were found.'.format(', '.join(names)))
+        if required:
+            raise Exception('None of the columns "{}" were found.'.format(
+                ', '.join(names)))
+        else:
+            return None
         
     ######################################################
     # Standardizing peak counts for narrowPeak files
