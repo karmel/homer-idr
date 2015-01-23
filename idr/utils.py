@@ -4,15 +4,15 @@ Created on Aug 4, 2014
 @author: karmel
 
 '''
+from collections import OrderedDict
 import os
 import re
-import numpy as np
-from pandas.io.parsers import read_csv
-from collections import OrderedDict
-from pandas import DataFrame, Series
 import subprocess
 
+from pandas import DataFrame, Series
+from pandas.io.parsers import read_csv
 
+import numpy as np
 class IdrUtilities(object):
     '''
     Various utilities for converting files, processing data, etc. that are 
@@ -156,7 +156,7 @@ class IdrUtilities(object):
             try: return data[name]
             except KeyError: pass
         raise Exception(
-            'None of the columns "{}" were found.').format(', '.join(names))
+            'None of the columns "{}" were found.'.format(', '.join(names)))
         
     ######################################################
     # Standardizing peak counts for narrowPeak files

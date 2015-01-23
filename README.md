@@ -173,7 +173,7 @@ We repeat the pseudoreplication process for our pooled tag directory. For exampl
 	cd ~/CD4TCell-IDR
 	mkdir -p pseudoreps/pooled
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/individual
+	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/pooled
 
 #### 7. Call peaks on each of the individual pseudoreplicate tag directories.
 
