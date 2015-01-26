@@ -55,7 +55,8 @@ class IdrCaller(object):
             self.run_batch_analysis(file_1, file_2, output_prefix, 
                                     ranking_measure=ranking_measure)
             prefixes.append(output_prefix)
-            
+        print('prefixes')
+        print(prefixes)    
         return prefixes
         
     def run_batch_analysis(self, file_1, file_2, output_prefix, 
