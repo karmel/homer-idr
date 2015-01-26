@@ -315,7 +315,7 @@ class IdrArgumentParser(ArgumentParser):
                                                           pooled_files)
         
         # Pooled count should be within 2-fold of keep_count
-        if abs(math.log2(keep_count/pooled_count)) > 1:
+        if abs(math.log(keep_count/pooled_count, 2)) > 1:
             print('!! Warning: The number of peaks within the replicate '
                   + 'threshold is not within two-fold of the number of '
                   + 'peaks within the pooled threshold. This could indicate '
