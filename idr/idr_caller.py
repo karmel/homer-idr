@@ -98,6 +98,7 @@ class IdrCaller(object):
         
         # Need absolute paths for R scripts.
         output_f = os.path.abspath(os.path.join(output_dir, output_prefix))
+        print(comparison_files)
         comparison_files = [os.path.abspath(f) for f in comparison_files]
         
         cmd = 'cd {}'.format(os.path.join(os.path.dirname(
