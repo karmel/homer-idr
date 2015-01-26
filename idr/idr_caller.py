@@ -69,6 +69,12 @@ class IdrCaller(object):
         # Make sure to cd into idrCode dir, as the r scripts call other scripts
         # assuming they are in the same directory.
         
+        # We need to ensure absolute paths for input files, 
+        # as CDing into the R directory changes pathing.
+        file_1 = os.path.abspath(file_1)
+        file_2 = os.path.abspath(file_2)
+        output_prefix = os.path.abspath(output_prefix)
+        
         cmd = 'cd {}'.format(os.path.join(os.path.dirname(
                             os.path.realpath(__file__)), 'idrCode'))\
                     + ' && Rscript batch-consistency-analysis.r'\
@@ -89,12 +95,17 @@ class IdrCaller(object):
         '''
         # Make sure to cd into idrCode dir, as the r scripts call other scripts
         # assuming they are in the same directory.
+        
+        # Need absolute paths for R scripts.
+        output_f = os.path.abspath(os.path.join(output_dir, output_prefix))
+        comparison_files = [os.path.abspath(f) for f in comparison_files]
+        
         cmd = 'cd {}'.format(os.path.join(os.path.dirname(
                             os.path.realpath(__file__)), 'idrCode'))\
                     + ' && Rscript batch-consistency-plot.r'\
                               + ' {} {} {}'.format(
                                 len(comparison_files),
-                                os.path.join(output_dir,output_prefix),
+                                output_f,
                                 ' '.join(comparison_files))
         print('Running command:')
         print(cmd)
