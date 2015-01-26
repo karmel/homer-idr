@@ -28,6 +28,7 @@ class IdrCaller(object):
             file_2_name = os.path.splitext(os.path.basename(file_2))[0]
             filename = '{}-{}'.format(file_1_name, file_2_name)
             output_prefix = os.path.join(output_dir, filename)
+            print(file_1, file_2, output_prefix)
             self.run_batch_analysis(file_1, file_2, output_prefix, 
                                     ranking_measure=ranking_measure)
             prefixes.append(output_prefix)
@@ -48,10 +49,12 @@ class IdrCaller(object):
         # Sort our sets of pseudoreps so that we can find pairs
         sorted_reps = sorted(pseudoreps)
         prefixes = []
+        print(sorted_reps)
         for file_1, file_2 in zip(sorted_reps[::2],sorted_reps[1::2]):
             file_1_name = os.path.splitext(os.path.basename(file_1))[0]
             filename = file_1_name + '-pair'
             output_prefix = os.path.join(output_dir, filename)
+            print(file_1, file_2, output_prefix)
             self.run_batch_analysis(file_1, file_2, output_prefix, 
                                     ranking_measure=ranking_measure)
             prefixes.append(output_prefix)
@@ -67,6 +70,7 @@ class IdrCaller(object):
             [min.overlap.ratio] [is.broadpeak] [ranking.measure]
             
         '''
+        return
         # Make sure to cd into idrCode dir, as the r scripts call other scripts
         # assuming they are in the same directory.
         

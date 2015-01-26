@@ -225,8 +225,6 @@ class IdrArgumentParser(ArgumentParser):
                                                 (len(options.peak_files) + \
                                                 len(options.pseudorep_files))]
                 pooled_truncated = truncated[-len(options.pooled_pseudoreps):]
-                print(rep_truncated, pseudorep_truncated, pooled_truncated)
-                raise Exception
             else:
                 rep_truncated = options.rep_narrowpeaks
                 pseudorep_truncated = options.pseudorep_narrowpeaks
