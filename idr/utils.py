@@ -135,7 +135,7 @@ class IdrUtilities(object):
         # Prep it here if it exists, or substitute tag count.
         pval_col = self.get_first_column(data,
             self.p_value_columns, required=False)
-        if pval_col:
+        if pval_col is not None:
             pvals = -np.log10(pval_col)
         else: 
             pvals = pvals = [-1]*data.shape[0]
