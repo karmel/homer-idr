@@ -114,7 +114,8 @@ class IdrArgumentParser(ArgumentParser):
         for peak_file in peak_files:
             # Get extensionless name of file
             basename = os.path.splitext(os.path.basename(peak_file))[0]
-            basename = basename + str(randint(1,999)) # To avoid name collision
+            # Add a randint to avoid name collision
+            basename = basename + '_' + str(randint(1,999))
             output_file = os.path.join(output_dir, basename + '.narrowPeak')
             
             data = idrutils.import_homer_peaks(peak_file)
