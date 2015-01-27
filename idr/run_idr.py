@@ -243,12 +243,15 @@ class IdrArgumentParser(ArgumentParser):
             suffix = '-overlapped-peaks.txt'
             rep_files = []
             for prefix in rep_prefixes:
+                prefix = os.path.basename(prefix)
                 rep_files.append(os.path.join(replicate_dir, prefix + suffix))
             pseudorep_files = []
             for prefix in pseudorep_prefixes:
+                prefix = os.path.basename(prefix)
                 pseudorep_files.append(os.path.join(pseudorep_dir, prefix + suffix))
             pooled_files = []
             for prefix in pooled_prefixes:
+                prefix = os.path.basename(prefix)
                 pooled_files.append(os.path.join(pooled_dir, prefix + suffix))
         
             # Plot all of our pairwise comparisons
