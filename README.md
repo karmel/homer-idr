@@ -194,7 +194,7 @@ Again, use the **same permissive parameters** from above.
 	cd ~/CD4TCell-IDR
 	mkdir -p peaks/pooled-pseudoreps
 	cd peaks/pooled-pseudoreps
-	for f in ~/CD4TCell-IDR/pseudoreps/pooled-pseudoreps/*
+	for f in ~/CD4TCell-IDR/pseudoreps/pooled/*
 		do
 		findPeaks $f -P .1 -LP .1 -poisson .1 -style histone -nfr -i ~/CD4TCell-IDR/CD4TCell-Input-Combined -o ${f}_peaks.txt
 		done
