@@ -8,7 +8,7 @@ Questions? Comments? Email me: <karmel@arcaio.com>
 Last updated 2014-08.
 
 Cite: 
-[![DOI](https://zenodo.org/badge/5954/karmel/homer-idr.png)](http://dx.doi.org/10.5281/zenodo.11619)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.17163.svg)](http://dx.doi.org/10.5281/zenodo.17163)
 
 ## TOC
 
