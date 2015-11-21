@@ -1,3 +1,5 @@
+Note: This software is no longer actively maintained. Let me know if you'd like to take over!
+
 homer-idr
 =========
 
