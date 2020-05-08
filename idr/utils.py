@@ -140,9 +140,12 @@ class IdrUtilities(object):
         else: 
             pvals = pvals = [-1]*data.shape[0]
             
+        chrstart = Series(self.get_first_column(data, ['chromStart','start']))
+        chrstart = chrstart.subtract(1) # use 0-based coordinate for narrowPeak (i.e. BED 6+4)
+        
         columns = OrderedDict((
             ('chrom', self.get_first_column(data, ['chr','chrom', 'chromosome'])),
-            ('chromStart', self.get_first_column(data, ['chromStart','start'])),
+            ('chromStart', chrstart),
             ('chromEnd', self.get_first_column(data, ['chromEnd','end'])),
             ('name', self.get_first_column(data, ['#PeakID','PeakID','ID','name'])),
             ('score', Series([0]*data.shape[0])), # Leave zero so that signalValue column is used
@@ -153,7 +156,8 @@ class IdrUtilities(object):
             ('peak', Series([-1]*data.shape[0])), # Leave -1 as no point-source is called for each peak
             ))
         df = DataFrame(columns)
-        df = df.sort(['signalValue', 'pValue'], ascending=False)
+        df = df.sort_values(['chrom', 'chromStart', 'chromEnd'], ascending=True) # sort by chromosome, start and end coordinates
+        df['pValue'] = df['pValue'].round(4) # round pValue to 4 decimal places
         df.to_csv(output_file, sep='\t', header=False, index=False)
         
     def get_first_column(self, data, names, required=True):
