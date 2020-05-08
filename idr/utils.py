@@ -294,7 +294,7 @@ class IdrUtilities(object):
         if not sort_col:
             raise Exception('Could not find column to sort final peaks by!')
             
-        data = data.sort([sort_col], ascending=ascending)
+        data = data.sort_values([sort_col], ascending=ascending)
         data = data[:number_of_peaks]
         
         # Output to file
