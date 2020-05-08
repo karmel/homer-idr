@@ -168,7 +168,8 @@ class IdrArgumentParser(ArgumentParser):
         '''
         Truncate SORTED narrowPeak files so that they are all the same length.
         '''
-        self.check_output_dir(output_dir or options.output_dir)
+        output_dir = output_dir or options.output_dir
+        self.check_output_dir(output_dir)
         
         idrutils = IdrUtilities()
         output_files = idrutils.standardize_peak_counts(peak_files, 

@@ -50,23 +50,11 @@ Suggestions on how to best call peaks to all for lots of noise but not disturb t
 
 The IDR statistic is called algorithmically over a replicate set, but where to draw the line that separates noise from real peaks is determined by the user. According to the authors of the IDR package, the following guidelines apply:
 
-- "If you started with ~150 to 300K relaxed pre-IDR peaks for 
-large genomes (human/mouse), then threshold of 0.01 or 0.02 
-generally works well."
+- "If you started with ~150 to 300K relaxed pre-IDR peaks for large genomes (human/mouse), then threshold of 0.01 or 0.02 generally works well."
 
-- "If you started with < 100K pre-IDR peaks for large genomes 
-(human/mouse), then threshold of 0.05 is more appropriate."
+- "If you started with < 100K pre-IDR peaks for large genomes (human/mouse), then threshold of 0.05 is more appropriate."
 
-- "If you started with ~150 to 300K relaxed pre-IDR peaks for large 
-genomes (human/mouse), then threshold of 0.0025 or 0.005 generally 
-works well. We use a tighter threshold for pooled-consistency 
-since pooling and subsampling equalizes the pseudoreplicates in 
-terms of data quality. So we err on the side of caution and 
-use more stringent thresholds. The equivalence between a 
-pooled-consistency threshold of 0.0025 and original replicate 
-consistency threshold of 0.01 was calibrated based on a 
-gold-standard pair of high quality replicate datasets for the CTCF 
-transcription factor in human."
+- "If you started with ~150 to 300K relaxed pre-IDR peaks for large genomes (human/mouse), then threshold of 0.0025 or 0.005 generally works well. We use a tighter threshold for pooled-consistency since pooling and subsampling equalizes the pseudoreplicates in terms of data quality. So we err on the side of caution and use more stringent thresholds. The equivalence between a pooled-consistency threshold of 0.0025 and original replicate consistency threshold of 0.01 was calibrated based on a gold-standard pair of high quality replicate datasets for the CTCF transcription factor in human."
 
 We have interpreted this such that we establish a linear relationship between number of input peaks and the threshold, such that if you start with 75,000 peaks per sample, the threshold is .05, if you start with 300,000 peaks per sample, the threshold is .01, and everything between is scaled linearly. (And a comparable setup is employed for the pooled pseudoreplicates.) 
 
@@ -87,26 +75,9 @@ For example:
 	cd homer-idr
 	git clone https://github.com/karmel/homer-idr.git
 
-Then, add the Python package to your `PYTHONPATH`, either in your user's shell profile:
+You should be able to run the run_idr.py script:
 
-	nano ~/.bash_profile
-
-And add the lines:
-
-	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
-	export PYTHONPATH
-
-After saving your updated bash_profile, make sure to reload it with the command:
-
-	source ~/.bash_profile
-
-Alternatively, for less frequent use, you can just set the `PYTHONPATH` immediately before running, at the command line:
-
-	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
-
-You should now be able to run the run_idr.py script:
-
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py --help
+	python ~/software/homer-idr/homer-idr/run_idr.py --help
 
 
 ## Using homer-idr
@@ -164,7 +135,7 @@ We want to split the tags in each replicate randomly, so that we can analyze eac
 	cd ~/CD4TCell-IDR
 	mkdir -p pseudoreps/individual
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3 -o pseudoreps/individual
+	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d /data/CD4TCell-H3K4me2-1 /data/CD4TCell-H3K4me2-2 /data/CD4TCell-H3K4me2-3 -o pseudoreps/individual
 
 Note: This process takes longer than expected. I am using `awk` and other command line tools to shuffle the tag order then split, so I feel like it should be relatively fast, but it's not. Let me know if you know of a better cross-platform way to complete this task.
 
@@ -175,7 +146,7 @@ We repeat the pseudoreplication process for our pooled tag directory. For exampl
 	cd ~/CD4TCell-IDR
 	mkdir -p pseudoreps/pooled
 	# python run_idr.py pseudoreplicate -d [tag_dirs to split] -o [output_file]
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/pooled
+	python ~/software/homer-idr/homer-idr/run_idr.py pseudoreplicate -d ~/CD4TCell-H3K4me2-Combined -o pseudoreps/pooled
 
 #### 7. Call peaks on each of the individual pseudoreplicate tag directories.
 
@@ -214,7 +185,8 @@ To sum the steps above, we need:
 
 These sets of peaks then get fed into the run_idr.py program:
 
-	# python run_idr.py idr -p [replicate peaks] \
+	# python run_idr.py idr \
+	#	-p [replicate peaks] \
 	#	-pr [pseudorep peaks] \
 	#	-ppr [pooled pseudorep peaks] \
 	#	--pooled_peaks [pooled replicate peak file]
@@ -222,14 +194,14 @@ These sets of peaks then get fed into the run_idr.py program:
 
 Continuing our example, then:
 
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py idr -p ~/CD4TCell-IDR/peaks/replicates/* -pr ~/CD4TCell-IDR/peaks/pseudoreps/* -ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps --pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt -o ~/CD4TCell-IDR/idr-output
+	python ~/software/homer-idr/homer-idr/run_idr.py idr -p ~/CD4TCell-IDR/peaks/replicates/* -pr ~/CD4TCell-IDR/peaks/pseudoreps/* -ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps/* --pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt -o ~/CD4TCell-IDR/idr-output
 
 The same command, separated out into multiple lines for readability:
 
-	python ~/software/homer-idr/homer-idr/idr/run_idr.py idr \
+	python ~/software/homer-idr/homer-idr/run_idr.py idr \
 	-p ~/CD4TCell-IDR/peaks/replicates/* \
 	-pr ~/CD4TCell-IDR/peaks/pseudoreps/* \
-	-ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps \
+	-ppr ~/CD4TCell-IDR/peaks/pooled-pseudoreps/* \
 	--pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt \
 	-o ~/CD4TCell-IDR/idr-output
 
@@ -258,16 +230,17 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 - When in doubt, ask for help:
 
-		python ~/software/homer-idr/homer-idr/idr/run_idr.py --help
+		python ~/software/homer-idr/homer-idr/run_idr.py --help
 
 - If you want to try using different threshold values, you do not need to re-run the whole process. Just set the threshold manually, and pass in the already-processed IDR -overlapped-peaks.txt files like so:
 
-		python ~/software/homer-idr/homer-idr/idr/run_idr.py idr \
+		python ~/software/homer-idr/homer-idr/run_idr.py idr \
 		--rep_idr_peaks ~/CD4TCell-IDR/idr-output/replicate_comparisons/*overlapped-peaks.txt \
 		--pseudorep_idr_peaks ~/CD4TCell-IDR/idr-output/pseudorep_comparisons/*overlapped-peaks.txt \
 		--pooled_idr_peaks ~/CD4TCell-IDR/idr-output/pooled_comparisons/*overlapped-peaks.txt \
 		--pooled_peaks ~/CD4TCell-IDR/peaks/pooled/CD4TCell-H3K4me2-Combined_peaks.txt \
-		--threshold .04 --pooled_threshold .003 \
+		--threshold .04 \
+		--pooled_threshold .003 \
 		-o ~/CD4TCell-IDR/idr-output-2
 
 - By defauly, homer-idr uses the Normalized Tag Count to sort and compare peaks. If you would like to use p-value instead, use the parameter `--ranking_measure` when running the `idr` command:
@@ -276,8 +249,8 @@ The final Homer peak file can then be used for subsequent analysis with Homer or
 
 - homer-idr can also be used to convert Homer peak files to narrowPeak files, or to truncate narrowPeak files to the same length:
 
-		python ~/software/homer-idr/homer-idr/idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
+		python ~/software/homer-idr/homer-idr/run_idr.py homer2narrow -p ~/CD4TCell-Ets1_homer_peaks.txt -o ~/narrowPeak_files
 
-		python ~/software/homer-idr/homer-idr/idr/run_idr.py truncate -p ~/narrowPeak_files/* -o ~/truncated_files
+		python ~/software/homer-idr/homer-idr/run_idr.py truncate -p ~/narrowPeak_files/* -o ~/truncated_files
 		
 [IDR]: https://sites.google.com/site/anshulkundaje/projects/idr
