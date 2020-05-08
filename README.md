@@ -75,24 +75,7 @@ For example:
 	cd homer-idr
 	git clone https://github.com/karmel/homer-idr.git
 
-Then, add the Python package to your `PYTHONPATH`, either in your user's shell profile:
-
-	nano ~/.bash_profile
-
-And add the lines:
-
-	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
-	export PYTHONPATH
-
-After saving your updated bash_profile, make sure to reload it with the command:
-
-	source ~/.bash_profile
-
-Alternatively, for less frequent use, you can just set the `PYTHONPATH` immediately before running, at the command line:
-
-	PYTHONPATH=$PYTHONPATH:/home/me/software/homer-idr/homer-idr
-
-You should now be able to run the run_idr.py script:
+You should be able to run the run_idr.py script:
 
 	python ~/software/homer-idr/homer-idr/run_idr.py --help
 
